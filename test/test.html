@@ -8,49 +8,135 @@
         <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js"></script>
 
 
-        <!-- //animation components, check if they are current/ -->
-        <!-- <script src="https://unpkg.com/aframe-animation-component@5.1.2/dist/aframe-animation-component.min.js"></script> -->
-        <!-- <script src="https://unpkg.com/aframe-animation-component@^4.1.1/dist/aframe-animation-timeline-component.min.js"></script>  -->
         <script src="https://unpkg.com/aframe-animation-timeline-component@1.6.0/dist/aframe-animation-timeline-component.min.js"></script> 
 
+
+        <script type="text/javascript">
+            // test for fading in/out
+
+            AFRAME.registerSystem('transition', {
+                init: function () {
+
+                    document.addEventListener('DOMContentLoaded', (event) => {
+
+                        this.button = document.querySelector('#test-button');
+                        this.camera = document.querySelector('#camera');
+                    })
+                },
+                fade: function () {
+                    console.log('fading')
+
+                    const button = document.querySelector('#test-button');
+                    const scene = document.querySelector("a-scene");
+                    const camera = scene.camera.el;
+                    // const camera = document.querySelector('#camera');
+                    const fade = {
+                        dur: 1000,
+                        easing: 'linear'
+                    }
+
+                    var plane = document.createElement("a-plane");
+                    plane.setAttribute("position", "0 0 -1");
+                    // plane.setAttribute("rotation", "90 0 0");
+                    plane.setAttribute("material", "color: black; transparent: true; opacity: 0.5");
+                    // plane.setAttribute("material", "color: black;");
+                    // plane.setAttribute("material", "color: black; transparent: true; opacity: 0");
+
+                    // var fadeOut = document.createElement("a-animation");
+                    // fadeOut.setAttribute("attribute", "material.opacity");
+                    // fadeOut.setAttribute("from", "0");
+                    // fadeOut.setAttribute("to", "1");
+                    // fadeOut.setAttribute("dur", fade.dur);
+                    // fadeOut.setAttribute("easing", fade.easing);
+
+                    // var fadeIn = fadeOut.cloneNode(true);
+                    // fadeIn.setAttribute("from", "1");
+                    // fadeIn.setAttribute("to", "0");
+                    // fadeIn.setAttribute("delay", fade.dur + 100);
+
+                    // fadeOut.addEventListener("animationend", function() {
+                    //     console.log('fadeout end')
+                    //     this.transition();
+                    // }.bind(this));
+
+                    // fadeIn.addEventListener("animationend", function() {
+                    //     console.log('animation end')
+                    //     plane.removeChild(fadeIn);
+                    //     plane.removeChild(fadeOut);
+                    //     camera.removeChild(plane);
+                    // });
+
+                    // plane.appendChild(fadeIn);
+                    // plane.appendChild(fadeOut);
+                    camera.appendChild(plane);
+                },
+                transition: function () {
+                    console.log('transitioning...')
+                }
+            });
+
+
+
+            AFRAME.registerComponent('event-test', {
+                init: function() {
+                    console.log('event test up', this.el)
+                    this.el.addEventListener('boop', () => this.theThing())
+                },
+                theThing: () => {
+                    console.log('beep')
+                    console.log(this.el)
+                    this.otherThing()
+                },
+                otherThing: function() {
+                    console.log('else')
+                }
+            })
+
+        </script>
     </head>
     <body style="font-family:courier; color:white; background-color: black">
         <section id="main"></section>
-        <a-scene id="scene" animation-timeline__1="timeline: #testTimeline; loop: true">
+        <a-scene id="scene" animation-timeline__1="timeline: #testTimeline; loop: true" >
+
             <a-assets>
                 <a-timeline id="testTimeline">
+                    <!-- <a-timeline-animation select="#two-cubes" name="fadein" ></a-timeline-animation>
+                    <a-timeline-animation select="#two-cubes" name="fadeout" offset="500"></a-timeline-animation>    -->
                     <a-timeline-animation select="#testText" name="fadein" ></a-timeline-animation>
                     <a-timeline-animation select="#testText" name="fadeout" offset="500"></a-timeline-animation>
+
                 </a-timeline>
             </a-assets>
 
 
- 
             <a-mixin id="text"
-              text="align: center; color: #fff; width: 6; opacity: 0"
-              animation__fadein="property: text.opacity; from: 0; to: 1; dur: 3000; easing: linear; autoplay: false"
-              animation__fadeout="property: text.opacity; from: 1; to: 0; dur: 3000; easing: linear; autoplay: false"
-              animation__togglevisible="property: visible; from: false; to: true; dur: 1; autoplay: false"
-              animation__togglevisibleoff="property: visible; from: true; to: false; dur: 1; autoplay: false"
-              position="0 2 -3"
-              visible="true">    
-          </a-mixin>
+                text="align: center; color: #fff; width: 6; opacity: 0"
+                animation__fadein="property: text.opacity; from: 0; to: 1; dur: 3000; easing: linear; autoplay: false"
+                animation__fadeout="property: text.opacity; from: 1; to: 0; dur: 3000; easing: linear; autoplay: false"
+                animation__togglevisible="property: visible; from: false; to: true; dur: 1; autoplay: false"
+                animation__togglevisibleoff="property: visible; from: true; to: false; dur: 1; autoplay: false"
+                position="0 2 -3"
+                visible="true">    
+            </a-mixin>
 
-            <!-- <a-camera look-controls="pointerLockEnabled: false" near="0.001" wasd-controls>
-                <a-cylinder id="fing-longer" position="0.2 -0.4 -0.9" radius="0.01" height= "1.0" rotation="90 0 0" color="beige" opacity="1.0"></a-cylinder>
-                <a-entity pos-trail-line="segments: 10000" position="0.2 -0.4 -2"></a-entity>
-                <a-entity position="0.2 -0.4 -1.4" cursor="rayOrigin: entity; showLine: true;" raycaster="showLine: true; far: 16" line="color: white; opacity:0.5"></a-entity>
-            </a-camera> -->
+            <a-mixin id="cubes"
+                animation__fadein="property: material.opacity; from: 0; to: 1; dur: 3000; easing: linear; autoplay: false"
+                animation__fadeout="property: material.opacity; from: 1; to: 0; dur: 3000; easing: linear; autoplay: false"
+                animation__visible="property: visible; from: false; to: true; dur: 1; autoplay: false"
+                animation__invisible="property: visible; from: true; to: false; dur: 1; autoplay: false"
+                visible="true">    
+            </a-mixin>
 
-            <!-- <a-assets>
-                <a-asset-item id="fbx-asset" src="cubeSpin.fbx"></a-asset-item>
-            </a-assets> -->
-
-            <a-entity id="a" environment="preset: forest; groundColor: #445; grid: cross;"></a-entity>
 
             <a-entity position="0 0 0">
-                <a-camera look-controls="pointerLockEnabled: false" wasd-controls cursor="rayOrigin: mouse" raycaster="objects: .clickable;"></a-camera>
+                <a-camera id="camera" look-controls="pointerLockEnabled: false" wasd-controls cursor="rayOrigin: mouse" raycaster="objects: .clickable;">
+                    <a-plane id="blinder" position="0 0 -1" rotation="-90 0 0"></a-plane>
+                </a-camera>
             </a-entity>
+
+
+            <!-- <a-entity id="light-bulb" mixin="ambient-light" light="type: ambient; color: #fff; intensity: 0.5"></a-entity> -->
+            <a-entity id="a" environment="preset: forest; groundColor: #445; grid: cross;"></a-entity>
             <a-entity laser-controls raycaster="objects: .clickable; far: 5"></a-entity>
 
 
@@ -68,24 +154,38 @@
                 position="0 1 -2" scale="0.001 0.001 0.001" fbx-model="src: url(cubeSpin.fbx);">
                     
             </a-entity>
-            <a-entity id="play-button" position="1 1 -2">
-                <a-text value="play"></a-text>
+            <a-entity id="test-button" position="1 1 -2">
+                <a-text value="click to test transition"></a-text>
                 <a-box class="clickable" color='red' opacity="0.4"></a-box>
             </a-entity>
             <a-text mixin="text" value="TEST" id="testText" position="1 2 -2"></a-text>
+
+            <!-- animation="property: opacity; to: 0; loop: true; dur: 10000"  -->
+            <a-entity geometry="primitive: plane" id="two-cubes" mixin="cubessss" event-test position="-1 2 -4" material="opacity: 0.0; transparent: true" opacity="0.5" transparent="true">
+                <a-box position="0.25 0.25 0.25"></a-box>
+                <a-box position="-0.25 -0.25 -0.25"></a-box>
+            </a-entity>
         </a-scene>
 
         <script type="text/javascript">
-            const playButton = document.querySelector('#play-button');
-            const testFbx = document.querySelector('#test-fbx')
+            const playButton = document.querySelector('#test-button');
+            const testFbx = document.querySelector('#test-fbx');
+            const boxes = document.querySelector('#two-cubes');
+
+            const transitionSystem = document.querySelector('a-scene').systems['transition']
 
             let bool = true
             playButton.addEventListener('click', () => {
-                bool = !bool
-                console.log(testFbx)
-                if (bool) {
-                    // testFbx.stopAction()
-                }
+
+                transitionSystem.fade()
+
+
+                // boxes.emit('boop')
+                // bool = !bool
+                // // console.log(testFbx)
+                // if (bool) {
+                //     // testFbx.stopAction()
+                // }
             });
         </script>
     </body>
