@@ -19,6 +19,7 @@
 			init: function () {
 				const action = {
 					'new-cube': this.newCube,
+					'refresh-page': this.refreshPage,
 				}[this.data];
 
             	this.el.addEventListener('click', () => {
@@ -38,15 +39,104 @@
 			},
 			newCube: function () {
 				console.log('new cube!')
+			},
+			refreshPage: function () {
+				// doing just location.reload() freezes on "load" screen, and then "enter vr" button won't work
+				// window.location.reload()
 			}
+		})
+
+		AFRAME.registerComponent('hud', {
+			init: function () {
+				this.count = 0;
+
+			},
+			increment: function() {
+				this.count++;
+				console.log(this.count)
+				this.el.setAttribute('value', this.count)
+				// value="frames-per-second"
+
+
+			},
+
+		})
+
+		// checks if location is within the "count zone"
+
+		AFRAME.registerComponent('countable', {
+			init: function () {
+				this.wPos = new THREE.Vector3();
+
+				this.targetPos = new THREE.Vector3();
+				// console.log('countable')
+
+				// countables only spawn after dom content is loaded!!!
+
+		    	const startPos = new THREE.Vector3();
+		    	const sensorPos = new THREE.Vector3();
+
+		    	const countSensor = document.querySelector('#sensor-0')
+		    	// console.log(this.countSensor)
+		    	// console.log(this.countSensor.object3D)
+		    	this.el.object3D.getWorldPosition(startPos)
+		    	countSensor.object3D.getWorldPosition(sensorPos)
+
+		    	const targetPos = new THREE.Vector3()
+		    	targetPos.copy(this.el.object3D.position).add(sensorPos).sub(startPos)
+
+		    	// this.targetPos
+
+		    	this.pos = this.el.object3D.position
+		    	this.targetPos = targetPos
+
+			    window.addEventListener('DOMContentLoaded', (event) => {
+			    	// const startPos = new THREE.Vector3();
+			    	// const sensorPos = new THREE.Vector3();
+
+			    	// this.countSensor = document('#sensor-0')
+			    	// this.countSensor.object3D
+			    	// console.log(this.countSensor.object3D)
+			    	// this.el.object3D.getWorldPosition(startPos)
+
+
+			    	// console.log('dom content laoded')
+			    	// console.log('dom content laoded')
+			    	// console.log('dom content laoded')
+			    	// console.log('dom content laoded')
+			    	// console.log('dom content laoded')
+			    	// console.log('dom content laoded')
+			    	// console.log('dom content laoded')
+
+			    })
+			},
+
+			tick: function () {
+				const tDist = 0.25
+				const dy = this.pos.y - this.targetPos.y 
+				if (Math.abs(dy) < tDist && Math.abs(this.pos.x - this.targetPos.x) < tDist && Math.abs(this.pos.z - this.targetPos.z ) < tDist) {
+
+					// console.log('aaaaa')
+				    this.el.setAttribute('color', 'white');
+				}
+			}
+
+
 		})
 
 		AFRAME.registerComponent('conveyor', {
 			init: function () {
-
+				this.zLimit = -6;//z where item teleports back
+				this.zLoop = 6;//teleport distance
+				this.pos = this.el.object3D.position
 			},
 			tick: function () {
-				this.el.object3D.position.z -= 0.01
+				if (this.pos.z < this.zLimit) {
+					this.pos.z += this.zLoop;
+				} else {
+
+					this.pos.z -= 0.025
+				}
 			}
 		})
 
@@ -60,29 +150,42 @@
 					throw 'grip-to-move requires a targetID parameter, with ID of camera rig/wrapper'
 				}
 
-		    this._anchor_el = document.createElement('a-sphere');
-		    this._anchor_el.setAttribute('color', 'white');
-		    this._anchor_el.setAttribute('radius', '0.05');
+				this._worldPosA = new THREE.Vector3();
+				this._worldPosB = new THREE.Vector3();
 
-		    this._active = this._anchor_el.object3D.visible = false;
+			    this._anchor_el = document.createElement('a-sphere');
+			    this._anchor_el.setAttribute('color', 'white');
+			    this._anchor_el.setAttribute('radius', '0.05');
 
-		  	this._camera_rig = document.getElementById(this.data.targetID);
-		    this._camera_rig.appendChild(this._anchor_el);
+			    this._active = this._anchor_el.object3D.visible = false;
 
-		    this.el.addEventListener('gripdown', (e) => {
-		      this._anchor_el.object3D.position.copy(this.el.object3D.position);
-		      this._active = this._anchor_el.object3D.visible = true;
-		    })
+			  	this._camera_rig = document.getElementById(this.data.targetID);
+			    this._camera_rig.appendChild(this._anchor_el);
 
-		    this.el.addEventListener('gripup', (e) => {
-		      this._active = this._anchor_el.object3D.visible = false;
-		    })
+			    this.el.addEventListener('gripdown', (e) => {
+
+			    	// copy
+					this._anchor_el.object3D.position.copy(this.el.object3D.position);
+					this._active = this._anchor_el.object3D.visible = true;
+
+			    	// adjust for cases where camera rig might be rotated
+			    	this.el.object3D.getWorldPosition(this._worldPosA)
+			    	this._anchor_el.object3D.getWorldPosition(this._worldPosB)
+			    	this._anchor_el.object3D.position.add(this._worldPosA).sub(this._worldPosB)
+			    })
+
+			    this.el.addEventListener('gripup', (e) => {
+			      this._active = this._anchor_el.object3D.visible = false;
+			    })
 			},
 			tick: function() {
 				if(this._active) {
-				  this._camera_rig.object3D.position.x += this.el.object3D.position.x - this._anchor_el.object3D.position.x;
-				  // this._camera_rig.object3D.position.y += this.el.object3D.position.y - this._anchor_el.object3D.position.y;
-				  this._camera_rig.object3D.position.z += this.el.object3D.position.z - this._anchor_el.object3D.position.z;
+					this.el.object3D.getWorldPosition(this._worldPosA)
+					this._anchor_el.object3D.getWorldPosition(this._worldPosB)
+
+					this._camera_rig.object3D.position.x += this._worldPosA.x - this._worldPosB.x;
+					this._camera_rig.object3D.position.y += this._worldPosA.y - this._worldPosB.y;
+					this._camera_rig.object3D.position.z += this._worldPosA.z - this._worldPosB.z;
 				}
 
 			}
@@ -179,7 +282,7 @@
 
 	<!-- this s meant to be a clean reference for physics stuff -->
 	<!-- https://github.com/donmccurdy/aframe-physics-system -->
-	<a-scene physics="debug: false; friction: 0.1; restitution: 0.5">
+	<a-scene physics="debug: true; friction: 0.1; restitution: 0.3">
 
 	  <!-- Camera -->
 	  <!-- <a-entity camera look-controls></a-entity> -->
@@ -188,21 +291,26 @@
 
 
 
-  <a-entity id="camera-wrapper">
-    <a-camera cursor="rayOrigin: mouse" look-controls="pointerLockEnabled: false" near="0.001">
-        <a-text opacity="0.1" value="frames-per-second" width="0.8" position="0.2 -0.3 -0.9"></a-text>
-        <a-text opacity="0.1" fps-counter position="0.2 -0.4 -0.9"></a-text>
-        <a-cylinder static-body id="fing-longer" position="0.2 -0.4 -0.9" radius="0.01" height= "1.0" rotation="90 0 0" color="beige" opacity="1.0"></a-cylinder>
-    </a-camera>
-    <a-entity pos-trail-line laser-controls="hand: left" grip-to-move="targetID: camera-wrapper" raycaster="objects: .clickable; far:4">
-      <a-box  height="0.1" width="0.1" depth="0.1" opacity="0.2"></a-box>
-      <!-- link back to home page for oculus quest  -->
-      <a-box id="home-button" class="clickable" height="0.02" width="0.05" depth="0.05" position="0 -0.05 0" color="red"></a-box>
-    </a-entity>
-    <a-entity pos-trail-line laser-controls="hand: right" grip-to-move="targetID: camera-wrapper" raycaster="objects: .clickable; far:4">
-      <a-sphere line-drawer particle-applicator radius="0.0005" position="-0.05 -0.05 -0.05"></a-sphere>
-      <a-box height="0.1" width="0.1" depth="0.1" opacity="0.2"></a-box>
-    </a-entity>
+  <a-entity id="camera-wrapper" position="3 4 -8">
+  	<a-entity rotation="0 120 0">
+
+	    <a-camera cursor="rayOrigin: mouse" look-controls="pointerLockEnabled: false" near="0.001">
+	        <a-text id="counter" hud opacity="1" value="frames-per-second" width="0.8" position="0.2 -0.3 -0.9"></a-text>
+	        <a-cylinder static-body id="fing-longer" position="0.2 -0.4 -0.9" radius="0.01" height= "1.0" rotation="90 0 0" color="beige" opacity="1.0"></a-cylinder>
+	    </a-camera>
+
+
+	    <a-entity laser-controls="hand: left" grip-to-move="targetID: camera-wrapper" raycaster="objects: .clickable; far:4">
+	      <a-box  height="0.1" width="0.1" depth="0.1" opacity="0.2"></a-box>
+	      <a-box id="home-button" class="clickable" on-click="refresh-page" height="0.02" width="0.05" depth="0.05" position="0 -0.05 0" color="red"></a-box>
+	      <a-box static-body height="0.1" width="0.01" depth="2" position="0 0 -1"></a-box>
+	    </a-entity>
+	    <a-entity laser-controls="hand: right" grip-to-move="targetID: camera-wrapper" raycaster="objects: .clickable; far:4">
+	      <a-box height="0.1" width="0.1" depth="0.1" opacity="0.2"></a-box>
+	      <a-box static-body height="0.1" width="0.01" depth="2" position="0 0 -1"></a-box>
+	    </a-entity>
+
+  	</a-entity>
   </a-entity>
 
   
@@ -216,20 +324,141 @@
     </a-entity> -->
 
 
-  </a-entity>
+  <!-- </a-entity> -->
 
 
 
 
-	  <!-- Floor -->
-	  <a-plane color="gray" static-body rotation="-90 0 0" height="12" width="12"></a-plane>
+	<!-- Floor -->
+	<a-plane color="gray" static-body rotation="-90 0 0" height="12" width="12"></a-plane>
 
-	  <!-- Immovable box -->
-	  <!-- <a-box static-body position="0 0.5 -5" width="3" height="1" depth="1"></a-box> -->
+	<!-- Immovable box -->
+	<!-- <a-box static-body position="0 0.5 -5" width="3" height="1" depth="1"></a-box> -->
 
-	  <!-- Dynamic box -->
-	  <a-box dynamic-body click-test on-click="new-cube" class="clickable" color="orange" position="0 3 -3" width="1" height="1" depth="1"></a-box>
-	  <a-plane conveyor static-body position="0 0.25 2" height="4" width="4" rotation="-90 0 0"></a-plane>
+	<!-- Dynamic box -->
+	<!-- <a-box dynamic-body click-test on-click="new-cube" class="clickable" color="orange" position="0 3 -3" width="0.8" height="0.8" depth="0.8"></a-box> -->
+
+	<a-entity id="box-faucet" position="0 9 -3"></a-entity>
+	<!-- <a-entity id="the-bins" position="0 7 -3"></a-entity> -->
+	<script type="text/javascript">
+		const faucet = document.querySelector("#box-faucet")
+		// const theBins = document.querySelector("#the-bins")
+		// const boxHTML = 
+
+		// class PhysBox {
+		// 	constructor(config={}) {
+		// 	  this.element = document.createElement('a-box')
+		// 	  this.element.setAttribute('color', 'orange');
+		// 	  this.element.setAttribute('dynamic-body', {});
+		// 	  this.element.setAttribute('countable', {});
+		// 	  // this.element.setAttribute('radius', '0.01');
+		// 	  // this.element.setAttribute('material', "shader: flat")
+		// 	  // this.element.setAttribute('type', "point")
+		// 	  this.element.classList.add('clickable')
+		// 	  // this.element.setAttribute('position', `${config.pos_x} ${config.pos_y} ${config.pos_z}`);
+		// 	  faucet.appendChild(this.element)
+		// 	}
+		// }
+		setInterval(drip, 500)
+		let limit = 100;
+		function drip () {
+			if (limit-- <= 0) return;
+
+			const CUBE_SIZE = 0.4;
+
+			this.element = document.createElement('a-box')
+			this.element.setAttribute('color', 'orange');
+			this.element.setAttribute('dynamic-body', {});
+			this.element.setAttribute('countable', {});
+			this.element.setAttribute('height', CUBE_SIZE);
+			this.element.setAttribute('width', CUBE_SIZE);
+			this.element.setAttribute('depth', CUBE_SIZE);
+
+			this.element.setAttribute('position', `${3*Math.random() -1.5} 0 0`);
+			this.element.setAttribute('rotation', `${ranDeg()} ${ranDeg()} ${ranDeg()}`);
+			// this.element.setAttribute('radius', '0.01');
+			// this.element.setAttribute('material', "shader: flat")
+			// this.element.setAttribute('type', "point")
+			this.element.classList.add('clickable')
+			// this.element.setAttribute('position', `${config.pos_x} ${config.pos_y} ${config.pos_z}`);
+			faucet.appendChild(this.element)
+		}
+		function ranDeg () {
+			return 360 * Math.random()
+		}
+
+		let binNum = 0;
+		function makeABin (x, y, z, height, width, depth) {
+			const el = document.createElement('a-entity')
+			el.setAttribute('position', `${x} ${y} ${z}`);
+			const leftWall = 
+			// front back left right botton
+			el.innerHTML = `
+				<a-plane static-body position="0 0 ${-depth/2}" height="${height}" width="${width}" material="side: double"></a-plane>
+				<a-plane static-body position="0 0 ${depth/2}" height="${height}" width="${width}" material="side: double"></a-plane>
+				<a-plane static-body position="${-width/2} 0 0" height="${height}" width="${depth}" rotation="0 90 0" material="side: double"></a-plane>
+				<a-plane static-body position="${width/2} 0 0" height="${height}" width="${depth}" rotation="0 90 0" material="side: double"></a-plane>
+
+				<a-box color="red" id="sensor-${binNum++}" height="0.25" width="0.25" depth="0.25"></a-box>
+
+			`
+			return el
+		}
+		// for (let i = 0; i < 4; i++) {
+		// 	theBins.appendChild(makeABin(1.5-i,0,0, 1.5, 1, 1))
+		// }
+
+
+	</script>
+
+
+	<a-entity position="0 4 0">
+
+		<!-- trash bin  -->
+		<a-entity id="the-bins" position="0 2.75 -0.5"></a-entity>
+		<script type="text/javascript">
+			const theBins = document.querySelector("#the-bins")
+			for (let i = 0; i < 4; i++) {
+				theBins.appendChild(makeABin(1.5-i,0,0, 1.5, 1, 1))
+			}
+		</script>
+
+		<!-- CONVEYOR BELT -->
+		<a-plane conveyor static-body position="0 0.5 0" height="1" width="4" material="side: double"></a-plane>
+		<!-- <a-plane conveyor static-body position="0 0.5 1" height="1" width="4" material="side: double"></a-plane> -->
+		<a-plane conveyor static-body position="0 0.5 2" height="1" width="4" material="side: double"></a-plane>
+		<!-- <a-plane conveyor static-body position="0 0.5 3" height="1" width="4" material="side: double"></a-plane> -->
+		<a-plane conveyor static-body position="0 0.5 4" height="1" width="4" material="side: double"></a-plane>
+		<!-- <a-plane conveyor static-body position="0 0.5 5" height="1" width="4" material="side: double"></a-plane> -->
+
+		<!-- CONVEYOR LANES -->
+		<a-entity position="0 0 -3">
+			<a-box static-body height="2" width="0.1" depth="6" position="-2 1 0"></a-box>
+			<!-- <a-box static-body height="2" width="0.1" depth="6" position="-1 1 0"></a-box> -->
+			<!-- <a-box static-body height="2" width="0.1" depth="6" position="0 1 0"></a-box> -->
+			<!-- <a-box static-body height="2" width="0.1" depth="6" position="1 1 0"></a-box> -->
+			<a-box static-body height="2" width="0.1" depth="6" position="2 1 0"></a-box>
+
+			<!-- conveyor backdrop and floor -->
+			<a-box static-body height="2" width="4" depth="0.1" position="0 1 3"></a-box>
+			<a-box static-body height="0.1" width="4" depth="6" position="0 0 0"></a-box>
+
+			<!-- conveyor lid -->
+			<a-plane static-body position="0 3.4 -0.5" opacity="0.5" height="5" width="4" rotation="90 0 0" material="side: double"></a-plane>
+		</a-entity>
+
+		<!-- GIGA BIN -->
+		<a-entity position="0 -3 -9">
+			<!-- top-to-down order: left right front back floor -->
+			<a-plane static-body position="-3 0 0" height="6" width="6" material="side: double" rotation="0 90 0"></a-plane>
+			<a-plane static-body position="3 0 0" height="6" width="6" material="side: double" rotation="0 90 0"></a-plane>
+			<a-plane static-body position="0 0 3" height="6" width="6" material="side: double"></a-plane>
+			<a-plane static-body position="0 0 -3" height="6" width="6" material="side: double"></a-plane>
+			<a-plane static-body position="0 -3 0" height="6" width="6" material="side: double" rotation="90 0 0"></a-plane>
+		</a-entity>
+
+	</a-entity>
+
 
 	  <a-box dynamic-body click-test on-click="new-cube" class="clickable" color="green" position="5 0.5 0" width="1" height="1" depth="1"></a-box>
 
