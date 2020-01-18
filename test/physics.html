@@ -76,7 +76,7 @@
 		    	const startPos = new THREE.Vector3();
 		    	const sensorPos = new THREE.Vector3();
 
-		    	const countSensor = document.querySelector('#sensor-0')
+		    	const countSensor = document.querySelector('#sensor-bar')
 		    	// console.log(this.countSensor)
 		    	// console.log(this.countSensor.object3D)
 		    	this.el.object3D.getWorldPosition(startPos)
@@ -112,15 +112,40 @@
 			},
 
 			tick: function () {
-				const tDist = 0.25
-				const dy = this.pos.y - this.targetPos.y 
-				if (Math.abs(dy) < tDist && Math.abs(this.pos.x - this.targetPos.x) < tDist && Math.abs(this.pos.z - this.targetPos.z ) < tDist) {
+				const tyDist = 0.50
+				const tzDist = 0.50
+				const txDist = 2
 
-					// console.log('aaaaa')
-				    this.el.setAttribute('color', 'white');
+				const dy = this.pos.y - this.targetPos.y 
+				if (Math.abs(dy) < tyDist) {
+
+					const dz = Math.abs(this.pos.z - this.targetPos.z);
+					if (dz < tzDist) {
+
+						const dx = Math.abs(this.pos.x - this.targetPos.x);
+						if (dx < txDist) {
+
+							const binID = Math.floor(this.pos.x - this.targetPos.x + txDist)
+
+							switch (binID) {
+								case 0:
+									this.el.setAttribute('color', 'red');
+									break;
+								case 1:
+									this.el.setAttribute('color', 'green');
+									break;
+								case 2:
+									this.el.setAttribute('color', 'blue');
+									break;
+								case 3:
+									this.el.setAttribute('color', 'white');
+									break;
+							}
+
+						}
+					}
 				}
 			}
-
 
 		})
 
@@ -387,7 +412,6 @@
 			return 360 * Math.random()
 		}
 
-		let binNum = 0;
 		function makeABin (x, y, z, height, width, depth) {
 			const el = document.createElement('a-entity')
 			el.setAttribute('position', `${x} ${y} ${z}`);
@@ -398,9 +422,6 @@
 				<a-plane static-body position="0 0 ${depth/2}" height="${height}" width="${width}" material="side: double"></a-plane>
 				<a-plane static-body position="${-width/2} 0 0" height="${height}" width="${depth}" rotation="0 90 0" material="side: double"></a-plane>
 				<a-plane static-body position="${width/2} 0 0" height="${height}" width="${depth}" rotation="0 90 0" material="side: double"></a-plane>
-
-				<a-box color="red" id="sensor-${binNum++}" height="0.25" width="0.25" depth="0.25"></a-box>
-
 			`
 			return el
 		}
@@ -415,7 +436,10 @@
 	<a-entity position="0 4 0">
 
 		<!-- trash bin  -->
-		<a-entity id="the-bins" position="0 2.75 -0.5"></a-entity>
+		<a-entity id="the-bins" position="0 2.75 -0.5">
+			<!-- proximity to sensor bar is used as a "goal" or "point"-->
+			<a-box color="red" id="sensor-bar" height="0.25" width="3.8" depth="0.25"></a-box>
+		</a-entity>
 		<script type="text/javascript">
 			const theBins = document.querySelector("#the-bins")
 			for (let i = 0; i < 4; i++) {
