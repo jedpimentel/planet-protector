@@ -1,0 +1,108 @@
+<html>
+  <head>
+        <script src="https://aframe.io/releases/1.0.3/aframe.min.js"></script>
+        <script src="inflate.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js"></script>
+        <script src="https://cdn.rawgit.com/feiss/aframe-environment-component/76b2bbf3/aframe-environment-component.min.js"></script>
+        <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.min.js"></script>
+        <script src="https://unpkg.com/aframe-physics-extras@0.1.2/dist/aframe-physics-extras.min.js"></script>
+        <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script>
+        <script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
+​
+<script>
+      
+AFRAME.registerComponent('kill', {
+	schema: {},
+	init: function () {
+	  
+	},
+	update: function () {
+	    
+	},
+	tick: function () {
+		var entity = this.el;
+		if (this.el.object3D.position.y < -3) {
+		      entity.parentNode.removeChild(entity);
+		  }
+		  
+	},
+	remove: function () {},
+	pause: function () {},
+	play: function () {}
+});
+      </script>
+      
+  </head>
+  <body>
+<a-scene physics="gravity: -9.8" render="highRefreshRate:true;">
+<a-entity id="teleHand" hand-controls="left"></a-entity>
+<a-entity id="blockHand" hand-controls="right"></a-entity>
+    
+    <a-assets>
+        <img id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
+        
+            <a-asset-item id="newFloor" src="floor.glb"></a-asset-item>
+        
+        <img id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
+        <a-mixin id="controller"
+                 super-hands="colliderEvent: collisions;
+                              colliderEventProperty: els;
+                              colliderEndEvent: collisions;
+                              colliderEndEventProperty: clearedEls;
+                              grabStartButtons: gripdown, pointdown, triggerdown;
+                              grabEndButtons: gripup, pointup, triggerup"
+                 static-body="shape: sphere; sphereRadius: 0.11"
+                 physics-collider
+                 collision-filter = "collidesWith: default, red, green, blue;
+                                     collisionForces: false">
+        </a-mixin>
+​
+        
+    </a-assets>
+​
+    <a-sky id="background" src="#skyTexture" theta-length="180" radius="32"></a-sky>
+    
+    <a-entity>
+      <a-camera></a-camera>
+      <a-entity sphere-collider="objects: a-box" hand-controls="left" mixin="controller"></a-entity>
+      <a-entity sphere-collider="objects: a-box" hand-controls="right" mixin="controller"></a-entity>
+    </a-entity>
+    <a-entity scale="0.018 0.018 0.018" position="0 1.0 0.5 "fbx-model="src: url(room.fbx);">-->
+        
+</a-entity>
+​
+    
+<script>
+    
+var sceneEl = document.querySelector('a-scene');
+    
+setInterval(spawnItem, 700);
+       
+function spawnItem() {
+	spawnItem2 = document.createElement('a-box');
+	sceneEl.appendChild(spawnItem2);
+	spawnItem2.setAttribute("geometry", "width: 0.2; height: 0.2; depth: 0.2");
+	spawnItem2.setAttribute("dynamic-body", "");
+	spawnItem2.setAttribute("grabbable", "");
+
+	spawnItem2.setAttribute("position", ""+(Math.random() * 1.0)-0.5+" -0.4 -2.4");
+	spawnItem2.setAttribute("kill", "");
+	setTimeout(function(){ 
+		spawnItem2.body.applyLocalImpulse(
+			new CANNON.Vec3((Math.random() * 5)-2, (Math.random() * 10)+32, 12),
+			new CANNON.Vec3(0, 0, 0)
+		);
+	}, 100);
+}
+        
+</script>
+           
+​
+​
+    
+    
+    
+</a-scene>
+​
+  </body>
+</html>
