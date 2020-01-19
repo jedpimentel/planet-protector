@@ -20,6 +20,9 @@
 	<meta charset="utf-8">
 
 	<script>
+		// globals
+		const binMult = 1/2.2
+		const binWidth = 1*binMult
 
 		AFRAME.registerComponent('time-board', {
 			init: function () {
@@ -116,6 +119,10 @@
 			}
 		})
 
+		// window.globals = {
+		// 	binsWidth = 2
+		// }
+
 		AFRAME.registerComponent('countable', {
 			init: function () {
 				this.wPos = new THREE.Vector3();
@@ -143,7 +150,7 @@
 			tick: function () {
 				const tyDist = 0.50;//Y-height of "sensor bar"
 				const tzDist = 0.50;//Z-depth of "sensor bar"
-				const txDist = 2;//X-width of "sensor bar"
+				const txDist = binWidth*3;//X-width of "sensor bar", from center of left to center of right (3-wide)
 
 				const dy = this.pos.y - this.targetPos.y 
 				if (Math.abs(dy) < tyDist) {
@@ -154,7 +161,16 @@
 						const dx = Math.abs(this.pos.x - this.targetPos.x);
 						if (dx < txDist) {
 
-							const binID = Math.floor(this.pos.x - this.targetPos.x + txDist)
+							const binRatio = 4*(txDist/2+this.pos.x - this.targetPos.x) / txDist
+							const binID = Math.floor(binRatio)
+
+							// TODO: FIX OUT OF RANGE binD problem
+							if (binID < 0 || binID > 3) return;
+
+							console.log(binRatio)
+							console.log(txDist/2+this.pos.x, this.pos.x, this.targetPos.x, txDist)
+							console.log(binID)
+
 							this.addToScoreBoard(binID)
 
 							switch (binID) {
@@ -254,7 +270,7 @@
 
 	<!-- this s meant to be a clean reference for physics stuff -->
 	<!-- https://github.com/donmccurdy/aframe-physics-system -->
-	<a-scene physics="debug: true; friction: 0.1; restitution: 0.3">
+	<a-scene physics="debug: true; friction: 0.1; restitution: 0.3;">
 
 	  <!-- Camera -->
 	  <!-- <a-entity camera look-controls></a-entity> -->
@@ -357,17 +373,6 @@
   	})
   </script>
 
-  <a-entity id="test-fbx"
-      animation-mixer="
-          duration: 1;
-          loop: 1;
-
-      "
-      position="-1 8 -2" scale="0.001 0.001 0.001" fbx-model="src: url(cubeSpin.fbx);">
-          
-  </a-entity>
-
-
 	<!-- <a-entity id="the-bins" position="0 7 -3"></a-entity> -->
 	<script type="text/javascript">
 		const faucet = document.querySelector("#box-faucet")
@@ -396,7 +401,7 @@
 		function drip () {
 			if (limit-- <= 0) return;
 
-			const CUBE_SIZE = 0.4;
+			const CUBE_SIZE = 0.2;
 			const itemType = Math.floor(4*Math.random())
 
 			const thisThing = document.createElement('a-box')
@@ -438,10 +443,10 @@
 			    new CANNON.Vec3(0, 0, 0)
 			  );
 
-			const thingText = document.createElement('a-text')
-			thingText.setAttribute('value', `${itemType}_____${itemType}`);
-			thingText.setAttribute('align', 'center');
-			thisThing.appendChild(thingText)
+			// const thingText = document.createElement('a-text')
+			// thingText.setAttribute('value', `${itemType}_____${itemType}`);
+			// thingText.setAttribute('align', 'center');
+			// thisThing.appendChild(thingText)
 			}, 100);
 		}
 		function ranDeg () {
@@ -470,6 +475,18 @@
 		<!-- trash bin physics -->
 		<a-entity id="the-bins" position="0 2.75 -0.5">
 
+		  <a-entity
+	      animation-mixer="
+	          duration: 1;
+	          loop: 1;
+
+	      "
+	      position="0 0 -2"
+				scale="0.001 0.001 0.001"
+				fbx-model="src: url(final-trashcans.fbx);">
+		          
+		  </a-entity>
+
 			<!-- proximity to sensor bar is used as a "goal" or "point"-->
 			<!-- NOT ACTUALLY A SENSOR, JUST MEANT TO SERVE AS A VISUAL THIS NEEDS TO BE HIDDEN -->
 			<a-box color="red" id="sensor-bar" height="0.25" width="3.8" depth="0.25" opacity="0"></a-box>
@@ -478,7 +495,8 @@
 			const theBins = document.querySelector("#the-bins")
 			const COLOR = ['red', 'green', 'blue', 'white']
 			for (let i = 0; i < 4; i++) {
-				const bin = makeABin(-1.5+i,0,0, 1.5, 1, 1, COLOR[i])
+				// const mult = 1/2.2
+				const bin = makeABin(-1.5*binMult+i*binMult,0,0, 1.5, 1*binMult, 1, COLOR[i])
 				// bin.setAttribute('color', )
 				theBins.appendChild(bin)
 			}
