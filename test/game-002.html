@@ -341,6 +341,7 @@
 	<a-entity id="box-faucet" position="0 9 -4"></a-entity>
 	<a-text time-board id='time-board' value="TIME\n-" align="center" font="monoid" position="-2 9 -5"></a-text>
 	<a-text score-board id='score-board' value="SCORE BOARD" font="monoid" position="0 9 -5"></a-text>
+	<a-text value=">_ PLANET PROTECTOR\ndo good or the world explodes" font="monoid" position="-2 11 -5"></a-text>
 
 
   <a-entity id="start-button" position="1 8 -2">
@@ -400,17 +401,22 @@
 
 			const thisThing = document.createElement('a-box')
 
+			const COLOR = [
+				'red', 'green', 'blue', 'white'	
+			]
+
 			// used to track what type of item this ir (0, 1, 2, or 3)
 			thisThing.setAttribute('item-type', itemType)
 
 			thisThing.setAttribute('sound', 'src: url(trash-audio.mp3); positional: true; autoplay: false; loop: false')
 
-			thisThing.setAttribute('color', 'orange');
+			thisThing.setAttribute('color', COLOR[itemType]);
+			// thisThing.setAttribute('color', 'orange');
 			thisThing.setAttribute('dynamic-body', {});
 			thisThing.setAttribute('countable', {});
 			thisThing.setAttribute('opacity', 0.5);
 
-      thisThing.setAttribute("grabbable", "");
+			thisThing.setAttribute("grabbable", "");
 
 			thisThing.setAttribute('height', CUBE_SIZE);
 			thisThing.setAttribute('width', CUBE_SIZE);
@@ -432,24 +438,25 @@
 			    new CANNON.Vec3(0, 0, 0)
 			  );
 
-				const thingText = document.createElement('a-text')
-				thingText.setAttribute('value', `${itemType}_____${itemType}`);
-				thingText.setAttribute('align', 'center');
-				thisThing.appendChild(thingText)
+			const thingText = document.createElement('a-text')
+			thingText.setAttribute('value', `${itemType}_____${itemType}`);
+			thingText.setAttribute('align', 'center');
+			thisThing.appendChild(thingText)
 			}, 100);
 		}
 		function ranDeg () {
 			return 360 * Math.random()
 		}
 
-		function makeABin (x, y, z, height, width, depth) {
+		function makeABin (x, y, z, height, width, depth, color) {
 			const el = document.createElement('a-entity')
 			el.setAttribute('position', `${x} ${y} ${z}`);
+			const wedge = 0.01
 			el.innerHTML = `
-				<a-box static-body position="0 0 ${-depth/2}" height="${height}" width="${width}" depth="0.01"></a-box>
-				<a-box static-body position="0 0 ${depth/2}" height="${height}" width="${width}" depth="0.01"></a-box>
-				<a-box static-body position="${-width/2} 0 0" height="${height}" width="0.01" depth="${depth}"></a-box>
-				<a-box static-body position="${width/2} 0 0" height="${height}" width="0.01" depth="${depth}"></a-box>
+				<a-box static-body color="${color}" position="0 0 ${-depth/2}" height="${height}" width="${width}" depth="0.01"></a-box>
+				<a-box static-body color="${color}" position="0 0 ${depth/2}" height="${height}" width="${width}" depth="0.01"></a-box>
+				<a-box static-body color="${color}" position="${-width/2+wedge} 0 0" height="${height}" width="0.01" depth="${depth}"></a-box>
+				<a-box static-body color="${color}" position="${width/2-wedge} 0 0" height="${height}" width="0.01" depth="${depth}"></a-box>
 			`
 			return el
 		}
@@ -469,8 +476,11 @@
 		</a-entity>
 		<script type="text/javascript">
 			const theBins = document.querySelector("#the-bins")
+			const COLOR = ['red', 'green', 'blue', 'white']
 			for (let i = 0; i < 4; i++) {
-				theBins.appendChild(makeABin(1.5-i,0,0, 1.5, 1, 1))
+				const bin = makeABin(-1.5+i,0,0, 1.5, 1, 1, COLOR[i])
+				// bin.setAttribute('color', )
+				theBins.appendChild(bin)
 			}
 		</script>
 
