@@ -15,33 +15,82 @@
   <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script>
   <script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
 
-
-
   <script src="inflate.min.js"></script>
-
 
 	<meta charset="utf-8">
 
 	<script>
+
+		AFRAME.registerComponent('time-board', {
+			init: function () {
+				// this.el.addEventListener('grabbed', () => this.el.click())
+			},
+			startTimer: function (msTime) {
+				console.log(msTime)
+
+				let msLeft = msTime;
+				this.displayTime(msLeft)
+				let interval = setInterval(() => {
+					msLeft -= 1000;
+					if (msLeft <= 0) {
+						this.displayTime(0)
+						console.log('end')
+						clearInterval(interval)
+						return
+					}
+					this.displayTime(msLeft)
+				}, 1000)
+			},
+			displayTime: function (msTime) {
+				this.el.setAttribute('value', `
+					TIME
+					${formatTime(msTime)}
+				`)
+
+				function formatTime(msTime) {
+					return Math.floor(msTime/1000)
+				}
+			},
+			gameDone: function () {
+				console.log('game is done')
+			}
+
+		})
 		AFRAME.registerComponent('score-board', {
 			init: function () {
 				this.count = 0
+				// this.updateCount();
+
+				this.scores = [
+					{good: 0, bad: 0},
+					{good: 0, bad: 0},
+					{good: 0, bad: 0},
+					{good: 0, bad: 0},
+				]
 				this.updateCount();
+				// console.log(this.scores)
 			},
 
-			increment: function() {
-				this.count++;
-				console.log(this.count)
-				this.el.setAttribute('value', this.count)
-				// value="frames-per-second"
+			updateCount: function (type=-1, isCorrect) {
+				// console.log(this.scores)
+				if (type >= 0) {
+					this.scores[type][isCorrect ? 'good' : 'bad']++;
+					this.count++;
+				}
 
-
-			},
-			updateCount: function () {
 				this.el.setAttribute('value', `
-					SCORE BOARD
-					A) ${this.count}
+					-SCORE BOARD-
+					-  good  bad-
+					A)  ${threeSpaceNum(this.scores[0].good)}  ${threeSpaceNum(this.scores[0].bad)}
+					B)  ${threeSpaceNum(this.scores[1].good)}  ${threeSpaceNum(this.scores[1].bad)}
+					C)  ${threeSpaceNum(this.scores[2].good)}  ${threeSpaceNum(this.scores[2].bad)}
+					D)  ${threeSpaceNum(this.scores[3].good)}  ${threeSpaceNum(this.scores[3].bad)}
 				`)
+
+				function threeSpaceNum(num) {
+					const str = num.toString()
+					return " ".repeat(3 - str.length).concat(str)
+				}
 			}
 
 		})
@@ -53,103 +102,48 @@
 					'refresh-page': this.refreshPage,
 				}[this.data];
 
-            	this.el.addEventListener('click', () => {
-            		action()
-	            });
-
-			    document.addEventListener('DOMContentLoaded', (event) => {
-			    	console.log('dom content laoded')
-			    	console.log('dom content laoded')
-			    	console.log('dom content laoded')
-			    	console.log('dom content laoded')
-			    	console.log('dom content laoded')
-			    	console.log('dom content laoded')
-			    	console.log('dom content laoded')
-
-			    })
+      	this.el.addEventListener('click', () => {
+      		action()
+        });
 			},
 			newCube: function () {
-				console.log('new cube!')
+				// console.log('new cube!')
 			},
 			refreshPage: function () {
-				// doing just location.reload() freezes on "load" screen, and then "enter vr" button won't work
+				// doing just location.reload() freezes on "load" screen
+				// then "enter vr" button didn't work and I had to restart the Quesgt
 				// window.location.reload()
 			}
 		})
-
-		// AFRAME.registerComponent('hud', {
-		// 	init: function () {
-		// 		this.count = 0;
-
-		// 	},
-		// 	increment: function() {
-		// 		this.count++;
-		// 		console.log(this.count)
-		// 		this.el.setAttribute('value', this.count)
-		// 		// value="frames-per-second"
-
-
-		// 	},
-
-		// })
-
-		// checks if location is within the "count zone"
 
 		AFRAME.registerComponent('countable', {
 			init: function () {
 				this.wPos = new THREE.Vector3();
 
 				this.targetPos = new THREE.Vector3();
-				// console.log('countable')
+	    	const startPos = new THREE.Vector3();
+	    	const sensorPos = new THREE.Vector3();
 
-				// countables only spawn after dom content is loaded!!!
+	    	const countSensor = document.querySelector('#sensor-bar')
 
-		    	const startPos = new THREE.Vector3();
-		    	const sensorPos = new THREE.Vector3();
+	    	this.el.object3D.getWorldPosition(startPos)
+	    	countSensor.object3D.getWorldPosition(sensorPos)
 
-		    	const countSensor = document.querySelector('#sensor-bar')
-		    	// console.log(this.countSensor)
-		    	// console.log(this.countSensor.object3D)
-		    	this.el.object3D.getWorldPosition(startPos)
-		    	countSensor.object3D.getWorldPosition(sensorPos)
+	    	this.pos = this.el.object3D.position
+	    	this.targetPos = new THREE.Vector3()
+	    	this.targetPos.copy(this.el.object3D.position).add(sensorPos).sub(startPos)
 
-		    	const targetPos = new THREE.Vector3()
-		    	targetPos.copy(this.el.object3D.position).add(sensorPos).sub(startPos)
-
-		    	// this.targetPos
-
-		    	this.pos = this.el.object3D.position
-		    	this.targetPos = targetPos
-
-			    window.addEventListener('DOMContentLoaded', (event) => {
-			    	// const startPos = new THREE.Vector3();
-			    	// const sensorPos = new THREE.Vector3();
-
-			    	// this.countSensor = document('#sensor-0')
-			    	// this.countSensor.object3D
-			    	// console.log(this.countSensor.object3D)
-			    	// this.el.object3D.getWorldPosition(startPos)
-
-
-			    	// console.log('dom content laoded')
-			    	// console.log('dom content laoded')
-			    	// console.log('dom content laoded')
-			    	// console.log('dom content laoded')
-			    	// console.log('dom content laoded')
-			    	// console.log('dom content laoded')
-			    	// console.log('dom content laoded')
-
-			    })
 			},
-			addToScoreBoard: function () {
+			addToScoreBoard: function (binIndex) {
 				const board = document.querySelector('#score-board').components['score-board']
-				board.increment()
+				const itemType = this.el.getAttribute('item-type')
+				this.el.components.sound.playSound()
+				board.updateCount(binIndex, itemType == binIndex)
 			},
-
 			tick: function () {
-				const tyDist = 0.50
-				const tzDist = 0.50
-				const txDist = 2
+				const tyDist = 0.50;//Y-height of "sensor bar"
+				const tzDist = 0.50;//Z-depth of "sensor bar"
+				const txDist = 2;//X-width of "sensor bar"
 
 				const dy = this.pos.y - this.targetPos.y 
 				if (Math.abs(dy) < tyDist) {
@@ -161,7 +155,7 @@
 						if (dx < txDist) {
 
 							const binID = Math.floor(this.pos.x - this.targetPos.x + txDist)
-							this.addToScoreBoard()
+							this.addToScoreBoard(binID)
 
 							switch (binID) {
 								case 0:
@@ -177,6 +171,8 @@
 									this.el.setAttribute('color', 'white');
 									break;
 							}
+
+							this.el.removeAttribute('countable')
 
 						}
 					}
@@ -251,91 +247,6 @@
 
 			}
 		})
-		AFRAME.registerComponent('click-test', {
-		      schema: {
-		        // refresh_ms: {type: 'number', default: 1000},
-		      },
-		      init: function() {
-		      	this.grabbed = false;
-		      	this.last_grabbed_by = undefined;//thing doing the grabbing
-		      	this.last_grabbed_vector = new THREE.Vector3();// vector from grabber to this
-		      	this.grabber_initial_pos = new THREE.Vector3();
-
-		      	var base_color;
-
-		      	this.el.addEventListener('click', (evt) => {
-		      		// console.log(evt)
-		      		// this.el.removeAttribute('click-test')//removing might be harder than this
-		      	})
-
-		      	this.el.addEventListener('mouseenter', (evt) => {
-		      		// console.log('mouse enter')
-		      		base_color = this.el.getAttribute('color')
-		      		this.el.setAttribute('color', '#66ff66') 
-		      	})
-		      	this.el.addEventListener('mouseleave', (evt) => {
-		      		// console.log('mouse leave')
-		      		this.grabbed = false;
-		      		this.el.setAttribute('color', base_color)
-		      	})
-
-		      	this.el.addEventListener('mousedown', (evt) => {
-		      		// console.log('mouse down', evt)
-		      		// this.el.setAttribute('color', base_color)
-		      		this.last_grabbed_by = evt.detail.cursorEl
-		      		// this.last_grabbed_vector.x = this.object3D.position.x - evt.detail.cursorEl.object3D.position.x;
-		      		// this.last_grabbed_vector.y = this.object3D.position.y - evt.detail.cursorEl.object3D.position.y;
-		      		// this.last_grabbed_vector.z = this.object3D.position.z - evt.detail.cursorEl.object3D.position.z;
-
-		      		evt.detail.cursorEl.object3D.getWorldPosition(this.grabber_initial_pos)
-
-		      		this.last_grabbed_vector.copy(
-		      			this.el.object3D.position).sub(
-		      			this.grabber_initial_pos)
-		      			// evt.detail.cursorEl.object3D.position)
-
-		      		// console.log('last', this.last_grabbed_vector)
-		      		this.grabbed = true;
-		      	})
-
-		      	this.el.addEventListener('mouseup', (evt) => {
-		      		// console.log('mouse up')
-		      		// this.el.setAttribute('color', base_color)
-		      		this.grabbed = false;
-		      		this.last_grabbed_by = undefined;
-
-
-
-		      	})
-
-
-		     //  	this._frame_counter = 0;
-		     //  	this._rate = 0;
-		     //  	const span_seconds = this.data.refresh_ms / 1000;
-
-		     //  	setInterval(() => {
-			  		// 	// alert("Hello");
-			  		// 	// this._rate = this._frame_counter / this.data.refresh_ms;
-			  		// 	this.el.setAttribute('value', this._frame_counter / span_seconds)
-			  		// 	this._frame_counter = 0;
-			  		// }, this.data.refresh_ms);
-		      },
-		      tick: function() {
-		      	// this._frame_counter++
-		      	if(this.grabbed) {
-		      		// console.log(this.el.object3D.position.y)
-		      		this.el.object3D.position.y += 0.01
-
-		      		// this.el.object3D.position.copy(this.last_grabbed_by.object3D.position)
-		      		this.el.object3D.position.copy(this.grabber_initial_pos)
-
-		      		this.last_grabbed_by.object3D.getWorldPosition(this.el.object3D.position)
-		      		this.el.object3D.position.add(this.last_grabbed_vector)
-
-
-		      	}
-		      }
-		})
 	</script>
 
 </head>
@@ -379,7 +290,7 @@
   		<!-- GAME UI -->
 
 	    <a-entity>
-	      <a-camera></a-camera>
+	      <a-camera cursor="rayOrigin: mouse"></a-camera>
 	      <a-entity grip-to-move="targetID: camera-wrapper" sphere-collider="objects: a-box" hand-controls="left" mixin="controller"></a-entity>
 	      <a-entity grip-to-move="targetID: camera-wrapper" sphere-collider="objects: a-box" hand-controls="right" mixin="controller"></a-entity>
 	    </a-entity>
@@ -427,62 +338,77 @@
 	<!-- Floor -->
 	<a-plane color="gray" static-body rotation="-90 0 0" height="12" width="12"></a-plane>
 
-	<!-- Immovable box -->
-	<!-- <a-box static-body position="0 0.5 -5" width="3" height="1" depth="1"></a-box> -->
-
-	<!-- Dynamic box -->
-	<!-- <a-box dynamic-body click-test on-click="new-cube" class="clickable" color="orange" position="0 3 -3" width="0.8" height="0.8" depth="0.8"></a-box> -->
-
 	<a-entity id="box-faucet" position="0 9 -4"></a-entity>
-	<a-text score-board id='score-board' value="SCORE BOARD" position="0 9 -5"></a-text>
+	<a-text time-board id='time-board' value="TIME\n-" align="center" font="monoid" position="-2 9 -5"></a-text>
+	<a-text score-board id='score-board' value="SCORE BOARD" font="monoid" position="0 9 -5"></a-text>
+
+
+  <a-entity id="start-button" position="1 8 -2">
+      <a-text value="Enter VR\nto start" align="center"></a-text>
+      <a-box color='red' opacity="0.4"></a-box>
+      <!-- instead of being clickable, game starts when user enters VR -->
+      <!-- <a-box class="clickable" color='red' opacity="0.4"></a-box> -->
+  </a-entity>
+  <script type="text/javascript">
+  	const startButton = document.querySelector('#start-button')
+  	document.addEventListener('enter-vr', () => {
+  		startButton.click()
+  	})
+  </script>
+
+  <a-entity id="test-fbx"
+      animation-mixer="
+          duration: 1;
+          loop: 1;
+
+      "
+      position="-1 8 -2" scale="0.001 0.001 0.001" fbx-model="src: url(cubeSpin.fbx);">
+          
+  </a-entity>
+
+
 	<!-- <a-entity id="the-bins" position="0 7 -3"></a-entity> -->
 	<script type="text/javascript">
 		const faucet = document.querySelector("#box-faucet")
-		// const theBins = document.querySelector("#the-bins")
-		// const boxHTML = 
 
-		// class PhysBox {
-		// 	constructor(config={}) {
-		// 	  this.element = document.createElement('a-box')
-		// 	  this.element.setAttribute('color', 'orange');
-		// 	  this.element.setAttribute('dynamic-body', {});
-		// 	  this.element.setAttribute('countable', {});
-		// 	  // this.element.setAttribute('radius', '0.01');
-		// 	  // this.element.setAttribute('material', "shader: flat")
-		// 	  // this.element.setAttribute('type', "point")
-		// 	  this.element.classList.add('clickable')
-		// 	  // this.element.setAttribute('position', `${config.pos_x} ${config.pos_y} ${config.pos_z}`);
-		// 	  faucet.appendChild(this.element)
-		// 	}
-		// }
+		let limit = 100;
+		const THROW_TIME = 1000
+		let timeLeft = THROW_TIME * limit + 5*1000;
 
 		document.addEventListener('DOMContentLoaded', () => {
+			const startButton = document.querySelector('#start-button')
 
-			setTimeout(() => setInterval(drip, 500), 1000)
+			startButton.addEventListener('click', () => {
+				setInterval(drip, THROW_TIME)
+				startButton.parentNode.removeChild(startButton)
+				{
+					// time-board
+					let timeBoard = document.querySelector('#time-board').components['time-board']
+					timeBoard.startTimer(timeLeft);
+				}
+
+			})
 		})
 
 
-		let limit = 100;
+		
 		function drip () {
 			if (limit-- <= 0) return;
 
 			const CUBE_SIZE = 0.4;
-			const cubeType = Math.floor(4*Math.random())
+			const itemType = Math.floor(4*Math.random())
 
 			const thisThing = document.createElement('a-box')
+
+			// used to track what type of item this ir (0, 1, 2, or 3)
+			thisThing.setAttribute('item-type', itemType)
+
+			thisThing.setAttribute('sound', 'src: url(trash-audio.mp3); positional: true; autoplay: false; loop: false')
+
 			thisThing.setAttribute('color', 'orange');
 			thisThing.setAttribute('dynamic-body', {});
 			thisThing.setAttribute('countable', {});
 			thisThing.setAttribute('opacity', 0.5);
-
-			// thisThing.innerHTML = `<a-text value="${cubeType}" align="center"></a-text>`
-			// {
-			// 	const thingText = document.createElement('a-text')
-			// 	thingText.setAttribute('value', cubeType);
-			// 	thingText.setAttribute('align', 'center');
-			// 	thisThing.appendChild(thingText)
-			// }
-			
 
       thisThing.setAttribute("grabbable", "");
 
@@ -499,7 +425,6 @@
 			// thisThing.setAttribute('position', `${config.pos_x} ${config.pos_y} ${config.pos_z}`);
 			faucet.appendChild(thisThing)
 
-
 			setTimeout(function () { 
 			  thisThing.body.applyLocalImpulse(
 			    // new CANNON.Vec3((Math.random() * 5)-2, (Math.random() * 10)+32, 12),
@@ -507,10 +432,10 @@
 			    new CANNON.Vec3(0, 0, 0)
 			  );
 
-					const thingText = document.createElement('a-text')
-					thingText.setAttribute('value', `${cubeType}_____${cubeType}`);
-					thingText.setAttribute('align', 'center');
-					thisThing.appendChild(thingText)
+				const thingText = document.createElement('a-text')
+				thingText.setAttribute('value', `${itemType}_____${itemType}`);
+				thingText.setAttribute('align', 'center');
+				thisThing.appendChild(thingText)
 			}, 100);
 		}
 		function ranDeg () {
@@ -520,13 +445,6 @@
 		function makeABin (x, y, z, height, width, depth) {
 			const el = document.createElement('a-entity')
 			el.setAttribute('position', `${x} ${y} ${z}`);
-			// front back left right botton
-			// el.innerHTML = `
-			// 	<a-plane static-body position="0 0 ${-depth/2}" height="${height}" width="${width}" material="side: double"></a-plane>
-			// 	<a-plane static-body position="0 0 ${depth/2}" height="${height}" width="${width}" material="side: double"></a-plane>
-			// 	<a-plane static-body position="${-width/2} 0 0" height="${height}" width="${depth}" rotation="0 90 0" material="side: double"></a-plane>
-			// 	<a-plane static-body position="${width/2} 0 0" height="${height}" width="${depth}" rotation="0 90 0" material="side: double"></a-plane>
-			// `
 			el.innerHTML = `
 				<a-box static-body position="0 0 ${-depth/2}" height="${height}" width="${width}" depth="0.01"></a-box>
 				<a-box static-body position="0 0 ${depth/2}" height="${height}" width="${width}" depth="0.01"></a-box>
@@ -535,10 +453,6 @@
 			`
 			return el
 		}
-		// for (let i = 0; i < 4; i++) {
-		// 	theBins.appendChild(makeABin(1.5-i,0,0, 1.5, 1, 1))
-		// }
-
 
 	</script>
 
@@ -549,16 +463,9 @@
 		<!-- trash bin physics -->
 		<a-entity id="the-bins" position="0 2.75 -0.5">
 
-			<!-- <a-entity position="0 1 0">
-				<a-box color='yellow'></a-box>
-		        <a-entity 
-		        	position="0 0 0" scale="0.001 0.001 0.001" fbx-model="src: url(final-trashcans.fbx);"
-
-		        ></a-entity>
-		    </a-entity> -->
-
 			<!-- proximity to sensor bar is used as a "goal" or "point"-->
-			<a-box color="red" id="sensor-bar" height="0.25" width="3.8" depth="0.25"></a-box>
+			<!-- NOT ACTUALLY A SENSOR, JUST MEANT TO SERVE AS A VISUAL THIS NEEDS TO BE HIDDEN -->
+			<a-box color="red" id="sensor-bar" height="0.25" width="3.8" depth="0.25" opacity="0"></a-box>
 		</a-entity>
 		<script type="text/javascript">
 			const theBins = document.querySelector("#the-bins")
@@ -656,12 +563,6 @@
 	  ></a-box>
 
 	  <!-- <a-torus dynamic-body="shape: hull" position="0 0.5 -1.5" radius="0.5" radius-tubular="0.1"></a-torus>	 -->
-
-	  <!-- <a-box grabbable click-test color="green" position="5 0.5 0" width="1" height="1" depth="1"></a-box> -->
-
-
-
-	  <!-- <a-box click-test color="green" dynamic-body position="5 0.5 0" width="1" height="1" depth="1"></a-box> -->
 		
 	</a-scene>
 
