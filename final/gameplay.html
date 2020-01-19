@@ -324,13 +324,22 @@
 
 	    <a-entity>
 	      <a-camera cursor="rayOrigin: mouse"></a-camera>
+	      <a-entity sphere-collider="objects: a-box" hand-controls="left" mixin="controller">
+	      	<a-box static-body height="0.025" width="1" depth="1" rotation='-30 0 0' position="0 -0.15 -0.25"></a-box> 
+	      </a-entity>
+	      <a-entity sphere-collider="objects: a-box" hand-controls="right" mixin="controller">
+	      	<a-box static-body height="0.025" width="1" depth="1" rotation='-30 0 0' position="0 -0.15 -0.25"></a-box> 
+	      </a-entity>
+	    </a-entity>
+	    <!-- <a-entity>
+	      <a-camera cursor="rayOrigin: mouse"></a-camera>
 	      <a-entity grip-to-move="targetID: camera-wrapper" sphere-collider="objects: a-box" hand-controls="left" mixin="controller">
 	      	<a-box static-body height="0.025" width="1" depth="1" rotation='-30 0 0' position="0 -0.15 -0.25"></a-box> 
 	      </a-entity>
 	      <a-entity grip-to-move="targetID: camera-wrapper" sphere-collider="objects: a-box" hand-controls="right" mixin="controller">
 	      	<a-box static-body height="0.025" width="1" depth="1" rotation='-30 0 0' position="0 -0.15 -0.25"></a-box> 
 	      </a-entity>
-	    </a-entity>
+	    </a-entity> -->
 
 
 
