@@ -39,6 +39,7 @@
 						this.displayTime(0)
 						console.log('end')
 						clearInterval(interval)
+						this.gameDone()
 						return
 					}
 					this.displayTime(msLeft)
@@ -65,8 +66,21 @@
 				// }
 			},
 			gameDone: function () {
-				console.log('game is done')
-			}
+			// 	console.log('game is done')
+
+			// 	restartGame()
+
+			// 	document.addEventListener('abuttondown', e => {
+
+			// 	});
+
+			// 	function restartGame() {
+			// 		const cubes = document.querySelectorAll('.countable-box')
+			// 		cubes.forEach(el => {
+			// 			el.parentNode.removeChild(el)
+			// 		})
+			// 	}
+			// }
 
 		})
 		AFRAME.registerComponent('score-board', {
@@ -322,7 +336,7 @@
   			<a-box static-body height="0.01" width="1" depth="1"></a-box> 
   		</a-entity> -->
 
-	    <a-entity>
+	    <!-- <a-entity>
 	      <a-camera cursor="rayOrigin: mouse"></a-camera>
 	      <a-entity sphere-collider="objects: a-box" hand-controls="left" mixin="controller">
 	      	<a-box static-body height="0.025" width="1" depth="1" rotation='-30 0 0' position="0 -0.15 -0.25"></a-box> 
@@ -330,8 +344,8 @@
 	      <a-entity sphere-collider="objects: a-box" hand-controls="right" mixin="controller">
 	      	<a-box static-body height="0.025" width="1" depth="1" rotation='-30 0 0' position="0 -0.15 -0.25"></a-box> 
 	      </a-entity>
-	    </a-entity>
-	    <!-- <a-entity>
+	    </a-entity> -->
+	    <a-entity>
 	      <a-camera cursor="rayOrigin: mouse"></a-camera>
 	      <a-entity grip-to-move="targetID: camera-wrapper" sphere-collider="objects: a-box" hand-controls="left" mixin="controller">
 	      	<a-box static-body height="0.025" width="1" depth="1" rotation='-30 0 0' position="0 -0.15 -0.25"></a-box> 
@@ -339,7 +353,7 @@
 	      <a-entity grip-to-move="targetID: camera-wrapper" sphere-collider="objects: a-box" hand-controls="right" mixin="controller">
 	      	<a-box static-body height="0.025" width="1" depth="1" rotation='-30 0 0' position="0 -0.15 -0.25"></a-box> 
 	      </a-entity>
-	    </a-entity> -->
+	    </a-entity>
 
 
 
@@ -398,9 +412,9 @@
   </a-entity>
   <script type="text/javascript">
   	const startButton = document.querySelector('#start-button')
-  	document.addEventListener('enter-vr', () => {
-  		startButton.click()
-  	})
+  	// document.addEventListener('enter-vr', () => {
+  	// 	startButton.click()
+  	// })
   </script>
 
 	<!-- <a-entity id="the-bins" position="0 7 -3"></a-entity> -->
@@ -408,7 +422,7 @@
 		const faucet = document.querySelector("#box-faucet")
 
 		let limit = 50;
-		let throwTime = 2000
+		let throwTime = 200//zoidberg
 		const timeStep = (throwTime/2)/limit
 		let timeLeft = throwTime * limit + 5*1000;
 
@@ -418,10 +432,12 @@
 			document.addEventListener('DOMContentLoaded', () => {
 				const startButton = document.querySelector('#start-button')
 
-
+				const scene = document.querySelector('a-scene')
 
 				startButton.addEventListener('click', () => {
 
+					// account for people pressing the start button from outside VR
+					scene.enterVR();
 					const timeBoard = document.querySelector('#time-board').components['time-board']
 					timeBoard.displayCount(limit);
 
@@ -480,6 +496,7 @@
 			const itemType = Math.floor(4*Math.random())
 
 			const thisThing = document.createElement('a-box')
+			thisThing.classList.add('countable-box')//used for removing from game
 
 			const COLOR = [
 				'red', 'green', 'blue', 'white'	
