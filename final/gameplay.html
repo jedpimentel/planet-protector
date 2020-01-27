@@ -21,6 +21,7 @@
 
 	<script>
 		// globals
+		console.log('YOLO')
 		const binMult = 1/2.2
 		const binWidth = 1*binMult
 
@@ -61,26 +62,34 @@
 					${count}
 				`)
 
+
+				if (count <= 0) {
+					this.gameDone()
+				}
+
 				// function formatCount(count) {
 				// 	return Math.floor(msTime/1000)
 				// }
 			},
 			gameDone: function () {
-			// 	console.log('game is done')
+				console.log('game is done')
 
-			// 	restartGame()
+				restartGame()
 
 			// 	document.addEventListener('abuttondown', e => {
 
 			// 	});
 
-			// 	function restartGame() {
-			// 		const cubes = document.querySelectorAll('.countable-box')
-			// 		cubes.forEach(el => {
-			// 			el.parentNode.removeChild(el)
-			// 		})
-			// 	}
-			// }
+				function restartGame() {
+					// #YOLO
+					const txt = document.querySelector('#restart-verbage')
+					txt.setAttribute('visible', true)
+					// const cubes = document.querySelectorAll('.countable-box')
+					// cubes.forEach(el => {
+					// 	el.parentNode.removeChild(el)
+					// })
+				}
+			}
 
 		})
 		AFRAME.registerComponent('score-board', {
@@ -336,7 +345,7 @@
   			<a-box static-body height="0.01" width="1" depth="1"></a-box> 
   		</a-entity> -->
 
-	    <!-- <a-entity>
+	    <a-entity>
 	      <a-camera cursor="rayOrigin: mouse"></a-camera>
 	      <a-entity sphere-collider="objects: a-box" hand-controls="left" mixin="controller">
 	      	<a-box static-body height="0.025" width="1" depth="1" rotation='-30 0 0' position="0 -0.15 -0.25"></a-box> 
@@ -344,8 +353,8 @@
 	      <a-entity sphere-collider="objects: a-box" hand-controls="right" mixin="controller">
 	      	<a-box static-body height="0.025" width="1" depth="1" rotation='-30 0 0' position="0 -0.15 -0.25"></a-box> 
 	      </a-entity>
-	    </a-entity> -->
-	    <a-entity>
+	    </a-entity>
+	    <!-- <a-entity>
 	      <a-camera cursor="rayOrigin: mouse"></a-camera>
 	      <a-entity grip-to-move="targetID: camera-wrapper" sphere-collider="objects: a-box" hand-controls="left" mixin="controller">
 	      	<a-box static-body height="0.025" width="1" depth="1" rotation='-30 0 0' position="0 -0.15 -0.25"></a-box> 
@@ -353,7 +362,7 @@
 	      <a-entity grip-to-move="targetID: camera-wrapper" sphere-collider="objects: a-box" hand-controls="right" mixin="controller">
 	      	<a-box static-body height="0.025" width="1" depth="1" rotation='-30 0 0' position="0 -0.15 -0.25"></a-box> 
 	      </a-entity>
-	    </a-entity>
+	    </a-entity> -->
 
 
 
@@ -410,23 +419,37 @@
       <!-- instead of being clickable, game starts when user enters VR -->
       <!-- <a-box class="clickable" color='red' opacity="0.4"></a-box> -->
   </a-entity>
-  <script type="text/javascript">
-  	const startButton = document.querySelector('#start-button')
-  	// document.addEventListener('enter-vr', () => {
-  	// 	startButton.click()
-  	// })
-  </script>
+
+  <a-text
+  	id="restart-verbage"
+  	visible="false"
+  	position="0 10 -2"
+  	align="center"
+  	color="green"
+  	value="How to reset this game:\nExit out of VR mode and refresh the browser\n"
+  ></a-text>
+
 
 	<!-- <a-entity id="the-bins" position="0 7 -3"></a-entity> -->
 	<script type="text/javascript">
 		const faucet = document.querySelector("#box-faucet")
 
 		let limit = 50;
-		let throwTime = 200//zoidberg
+		let throwTime = 2000//zoidberg
 		const timeStep = (throwTime/2)/limit
 		let timeLeft = throwTime * limit + 5*1000;
 
 		const COUNT_MODE = true
+
+		let gameStarted = false
+
+
+  	const startButton = document.querySelector('#start-button')
+  	document.addEventListener('enter-vr', () => {
+  		// if (!gameStarted) {
+  			startButton.click()
+  		// }
+  	})
 
 		if(COUNT_MODE) {
 			document.addEventListener('DOMContentLoaded', () => {
@@ -434,7 +457,14 @@
 
 				const scene = document.querySelector('a-scene')
 
-				startButton.addEventListener('click', () => {
+				startButton.addEventListener('click', startGame)
+
+				function startGame () {
+					console.log('starting game')
+
+					// these two lines need be above the "scene.enterVR();" to avoid "double time"
+					startButton.setAttribute('visible', false)
+					startButton.removeEventListener('click', startGame)
 
 					// account for people pressing the start button from outside VR
 					scene.enterVR();
@@ -457,14 +487,19 @@
 
 
 					// setInterval(drip, throwTime)
-					startButton.parentNode.removeChild(startButton)
+					// startButton.parentNode.removeChild(startButton)
+
+
+
 					// {
 					// 	// time-board
 					// 	let timeBoard = document.querySelector('#time-board').components['time-board']
 					// 	timeBoard.startTimer(timeLeft);
 					// }
 
-				})
+				}
+
+
 			})
 
 		} else {
@@ -567,7 +602,7 @@
 		<!-- trash bin physics -->
 		<a-entity id="the-bins" position="0 2.75 -0.5">
 
-		  <a-entity
+		  <!-- <a-entity
 	      animation-mixer="
 	          duration: 1;
 	          loop: 1;
@@ -576,8 +611,7 @@
 	      position="0 0 -2"
 				scale="0.001 0.001 0.001"
 				fbx-model="src: url(final-trashcans.fbx);">
-		          
-		  </a-entity>
+		  </a-entity> -->
 
 			<!-- proximity to sensor bar is used as a "goal" or "point"-->
 			<!-- NOT ACTUALLY A SENSOR, JUST MEANT TO SERVE AS A VISUAL THIS NEEDS TO BE HIDDEN -->
