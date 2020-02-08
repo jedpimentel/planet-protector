@@ -30,8 +30,9 @@
             physics="gravity: -9.8; friction: 0.03; debug:true"
             render="highRefreshRate:true;">
 
-    <a-entity id="teleHand" hand-controls="left"></a-entity>
-    <a-entity id="blockHand" hand-controls="right"></a-entity>
+            <!-- telehand concept sounds interesting for 3rd-person camera -->
+    <!-- <a-entity id="teleHand" hand-controls="left"></a-entity>
+    <a-entity id="blockHand" hand-controls="right"></a-entity> -->
     
     <a-assets>
       
@@ -115,7 +116,7 @@
         document.addEventListener('enter-vr', () => {
           const cameraRig = document.querySelector('#cameraRig')
           cameraRig.object3D.position.z += 1;
-          
+
           startGame();
 
           const entity = document.querySelector('#river');
