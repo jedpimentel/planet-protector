@@ -16,18 +16,17 @@
           if (this.el.object3D.position.y < -3) {
                 entity.parentNode.removeChild(entity);
           }
-          if (this.el.object3D.position.z > 1.7) {
+          if (this.el.object3D.position.z > 3.15) {
               entity.parentNode.removeChild(entity);
           }
         }
       });
     </script>
-
   </head>
 
   <body>
   <a-scene  fog="type: exponential; color: #222; density: 0.04"
-            physics="gravity: -9.8; friction: 0.03; debug:true"
+            physics="gravity: -9.8; friction: 0.03; debug:false"
             render="highRefreshRate:true;">
 
             <!-- telehand concept sounds interesting for 3rd-person camera -->
@@ -96,12 +95,86 @@
       position="0 0 2.2" static-body material="color: #7BC8A4">
     </a-box>
 
-    <a-box width="4" depth="30" height="2" material="opacity:0.0;"
+    <a-box width="4" depth="22" height="2" material="opacity:0.0;"
       rotation="-7.76 0 0" position="0 -1.68 2.2" static-body
       material="color: #7BC8A4"
     ></a-box>
 
-    
+    <!-- PHYSICS STUFF START -->
+    <a-entity id="the-bins" position="-0.02 0.25 -0.1">
+      <!-- NOT ACTUALLY A SENSOR, JUST MEANT TO SERVE AS A VISUAL THIS NEEDS TO BE HIDDEN -->
+      <a-box color="red" id="sensor-bar" height="0.25" width="3.8" depth="0.25" opacity="0"></a-box>
+    </a-entity>
+
+    <script type="text/javascript">
+
+      const binMult = 1/1.8
+      const binWidth = 1*binMult
+
+      const theBins = document.querySelector("#the-bins")
+      const COLOR = ['red', 'green', 'blue', 'white']
+      for (let i = 0; i < 4; i++) {
+        console.log('aaaaaaa')
+        // const mult = 1/2.2
+        const bin = makeABin(-1.5*binMult+i*binMult,0,0, 1, 1*binMult, 0.75, COLOR[i])
+        // bin.setAttribute('color', )
+        theBins.appendChild(bin)
+      }
+
+
+      function makeABin (x, y, z, height, width, depth, color) {
+        const el = document.createElement('a-entity')
+        el.setAttribute('position', `${x} ${y} ${z}`);
+        const wedge = 0.01
+        el.innerHTML = `
+          <a-box static-body color="${color}" position="0 0 ${-depth/2}" height="${height}" width="${width}" depth="0.01"></a-box>
+          <a-box static-body color="${color}" position="0 0 ${depth/2}" height="${height}" width="${width}" depth="0.01"></a-box>
+          <a-box static-body color="${color}" position="${-width/2+wedge} 0 0" height="${height}" width="0.01" depth="${depth}"></a-box>
+          <a-box static-body color="${color}" position="${width/2-wedge} 0 0" height="${height}" width="0.01" depth="${depth}"></a-box>
+        `
+        return el
+      }
+
+      AFRAME.registerComponent('conveyor', {
+        init: function () {
+          const span = 10
+          this.zLimit = -span;//z where item teleports back
+          this.zLoop = span;//teleport distance
+          this.pos = this.el.object3D.position
+        },
+        tick: function () {
+          if (this.pos.z < this.zLimit) {
+            this.pos.z += this.zLoop;
+          } else {
+
+            this.pos.z -= 0.0025
+          }
+        }
+      })
+    </script>
+
+    <!-- CONVEYOR BELT -->
+    <a-entity position="0 -1.25 0.5" rotation="-7.76 0 0">
+
+      <a-mixin  id="conveyor-plane"
+                static-body
+                conveyor
+                material="side: double">
+      </a-mixin>
+
+      <a-plane width="3.6" color="#334433" height="0.075" mixin="conveyor-plane" position="0 0.5 0" ></a-plane>
+      <a-plane width="3.6" color="#334433" height="0.075" mixin="conveyor-plane" position="0 0.5 1" ></a-plane>
+      <a-plane width="3.6" color="#334433" height="0.075" mixin="conveyor-plane" position="0 0.5 2" ></a-plane>
+      <a-plane width="3.6" color="#334433" height="0.075" mixin="conveyor-plane" position="0 0.5 3" ></a-plane>
+      <a-plane width="3.6" color="#334433" height="0.075" mixin="conveyor-plane" position="0 0.5 4" ></a-plane>
+      <a-plane width="3.6" color="#334433" height="0.075" mixin="conveyor-plane" position="0 0.5 5" ></a-plane>
+      <a-plane width="3.6" color="#334433" height="0.075" mixin="conveyor-plane" position="0 0.5 6" ></a-plane>
+      <a-plane width="3.6" color="#334433" height="0.075" mixin="conveyor-plane" position="0 0.5 7" ></a-plane>
+      <a-plane width="3.6" color="#334433" height="0.075" mixin="conveyor-plane" position="0 0.5 8" ></a-plane>
+      <a-plane width="3.6" color="#334433" height="0.075" mixin="conveyor-plane" position="0 0.5 9" ></a-plane>
+    </a-entity>
+
+    <!-- PHYSICS STUFF END -->
     <script>
       let spawnTrue = true;
       const sceneEl = document.querySelector('a-scene');
@@ -111,6 +184,30 @@
         'straw', 'cup', 'takeout', 'fork', 'juice', 'wine', 'soda',
         'news', 'paper', 'plastic', 'box', 'bottle', 'lid', 'cup2'
       ];
+
+      // categories
+      // Glass & Aluminum : 0
+      // Trash            : 1
+      // paper            : 2
+      // plastic          : 3
+
+      // THESE MIGHT BE OFF, NEED TO CONFIRM THE CATEGORIES
+      const categories = new Map([
+        ['straw'  , 1],
+        ['cup'    , 3],
+        ['takeout', 1],
+        ['fork'   , 3],
+        ['juice'  , 2],
+        ['wine'   , 0],
+        ['soda'   , 0],
+        ['news'   , 2],
+        ['paper'  , 2],
+        ['plastic', 3],
+        ['box'    , 2],
+        ['bottle' , 0],
+        ['lid'    , 3],
+        ['cup2'   , 3]
+      ]);
       
       window.onload = (event) => {
         document.addEventListener('enter-vr', () => {
