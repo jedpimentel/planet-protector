@@ -1,6 +1,6 @@
 <html>
   <head>
-        <title>Planet Protector VR</title>
+    <title>Planet Protector VR</title>
     <script src="assets/aframe.min.js"></script>
     <script src="assets/inflate.min.js"></script>
     <script src="assets/aframe-extras.min.js"></script>
@@ -8,155 +8,149 @@
     <script src="assets/aframe-physics-extras.min.js"></script>
     <script src="assets/super-hands.min.js"></script>
     <script src="assets/aframe-event-set-component.min.js"></script>
-<script>
 
-    
-  AFRAME.registerComponent('kill', {
-  schema: {},
-  init: function () {  
-      
-  },
-  update: function () {
-     
-  },
-  tick: function () {
-      var entity = this.el;
-    if (this.el.object3D.position.y < -3) {
-          entity.parentNode.removeChild(entity);
-      }
-      if (this.el.object3D.position.z > 1.7) {
-          entity.parentNode.removeChild(entity);
-      }
-      
-      
-  }
-});
-      </script>
-      
+    <script>
+      AFRAME.registerComponent('kill', {
+        tick: function () {
+          var entity = this.el;
+          if (this.el.object3D.position.y < -3) {
+                entity.parentNode.removeChild(entity);
+          }
+          if (this.el.object3D.position.z > 1.7) {
+              entity.parentNode.removeChild(entity);
+          }
+        }
+      });
+    </script>
+
   </head>
+
   <body>
-<a-scene fog="type: exponential; color: #222; density: 0.04" physics="gravity: -9.8; friction: 0.03;" render="highRefreshRate:true;">
-<a-entity id="teleHand" hand-controls="left"></a-entity>
-<a-entity id="blockHand" hand-controls="right"></a-entity>
+  <a-scene  fog="type: exponential; color: #222; density: 0.04"
+            physics="gravity: -9.8; friction: 0.03; debug:true"
+            render="highRefreshRate:true;">
+
+    <a-entity id="teleHand" hand-controls="left"></a-entity>
+    <a-entity id="blockHand" hand-controls="right"></a-entity>
     
     <a-assets>
-        <video id="firevid" autoplay loop="true" preload="auto" src="assets/fire.mp4"></video>
-        <a-mixin id="controller"
-                 super-hands="colliderEvent: collisions;
-                              colliderEventProperty: els;
-                              colliderEndEvent: collisions;
-                              colliderEndEventProperty: clearedEls;
-                              grabStartButtons: gripdown, pointdown, triggerdown;
-                              grabEndButtons: gripup, pointup, triggerup"
-                 static-body="shape: sphere; sphereRadius: 0.11"
-                 physics-collider
-                 collision-filter = "collidesWith: default, red, green, blue;
-                                     collisionForces: false">
-        </a-mixin>
-  
-        
+      
+      <video id="firevid" autoplay loop="true" preload="auto" src="assets/fire.mp4"></video>
+
+      <a-mixin id="controller"
+               super-hands="colliderEvent: collisions;
+                            colliderEventProperty: els;
+                            colliderEndEvent: collisions;
+                            colliderEndEventProperty: clearedEls;
+                            grabStartButtons: gripdown, pointdown, triggerdown;
+                            grabEndButtons: gripup, pointup, triggerup"
+               static-body="shape: sphere; sphereRadius: 0.11"
+               physics-collider
+               sphere-collider="objects: a-box"
+               collision-filter = "collidesWith: default, red, green, blue;
+                                   collisionForces: false">
+      </a-mixin>
     </a-assets>
     
     <a-entity id="river" geometry="primitive: plane" material="color: blue;"
-          position="0 0 20" sound="src: url(assets/music.ogg); autoplay: false; positional: false;"></a-entity>
+              position="0 0 20"
+              sound= "src: url(assets/music.ogg);
+                      autoplay: false;
+                      positional: false;">
+    </a-entity>
 
-          <a-video id="fire1" visible="false" src="#firevid" width="4" height="2" position="2 -1 -10" material="flatShading: true; shader:flat; blending: additive; "></a-video>
+    <a-video id="fire1"
+      visible="false" src="#firevid" width="4" height="2"
+      position="2 -1 -10"
+      material="flatShading: true; shader:flat; blending: additive; ">
+    </a-video>
     
-              <a-video id="fire2" visible="false" src="#firevid" width="4" height="2" position="-2 -1 -13" material="flatShading: true; shader:flat; blending: additive; "></a-video>
+    <a-video id="fire2" 
+      visible="false" src="#firevid" width="4" height="2" position="-2 -1 -13"
+      material="flatShading: true; shader:flat; blending: additive; ">
+    </a-video>
 
-<a-sky id="background" src="#skyTexture" theta-length="180" radius="32"></a-sky>
+    <a-sky id="background" src="#skyTexture" theta-length="180" radius="32">
+    </a-sky>
     
     <a-entity>
-
-  <a-camera id="camera"></a-camera>
-
-      
-      <a-entity sphere-collider="objects: a-box" hand-controls="left" mixin="controller"></a-entity>
-      <a-entity sphere-collider="objects: a-box" hand-controls="right" mixin="controller"></a-entity>
+      <a-camera id="camera"></a-camera>
+      <a-entity hand-controls="left" mixin="controller"></a-entity>
+      <a-entity hand-controls="right" mixin="controller"></a-entity>
     </a-entity>
-    <a-entity id="theRoom" scale="0.018 0.018 0.018" position="-1.3 -0.04 -0.3 "fbx-model="src: url(assets/room.fbx);">
-         
-</a-entity>
+
+    <a-entity id="theRoom"
+      scale="0.018 0.018 0.018" 
+      position="-1.3 -0.04 -0.3" 
+      fbx-model="src: url(assets/room.fbx);"> 
+    </a-entity>
+
     <a-entity light="type: ambient; color: #fff; intensity: 0.8;"></a-entity>
     
     <a-entity light="type: point; intensity: 0.75; distance: 50; decay: 2"
-          position="0 10 10"></a-entity>
+      position="0 10 10"
+    ></a-entity>
     
-    <a-box width="4" depth="4" height="0.1" material="opacity:0.0;" position="0 0 2.2" static-body material="color: #7BC8A4"></a-box>
-     <a-box width="4" depth="30" height="2" material="opacity:0.0;" rotation="-7.76 0 0" position="0 -1.68 2.2" static-body material="color: #7BC8A4"></a-box>
+    <a-box width="4" depth="4" height="0.1" material="opacity:0.0;"
+      position="0 0 2.2" static-body material="color: #7BC8A4">
+    </a-box>
+
+    <a-box width="4" depth="30" height="2" material="opacity:0.0;"
+      rotation="-7.76 0 0" position="0 -1.68 2.2" static-body
+      material="color: #7BC8A4"
+    ></a-box>
 
     
     <script>
-        spawnTrue = true;
-        var sceneEl = document.querySelector('a-scene');
-        
-        room = document.querySelector('#theRoom');
-                
-        itemsList = ['straw', 'cup', 'takeout', 'fork', 'juice', 'wine', 'soda', 'news', 'paper', 'plastic', 'box', 'bottle', 'lid', 'cup2'];
-        
+      let spawnTrue = true;
+      const sceneEl = document.querySelector('a-scene');
+      const room = document.querySelector('#theRoom');
+              
+      let itemsList = [
+        'straw', 'cup', 'takeout', 'fork', 'juice', 'wine', 'soda',
+        'news', 'paper', 'plastic', 'box', 'bottle', 'lid', 'cup2'
+      ];
+      
+      window.onload = (event) => {
+        document.addEventListener('enter-vr', () => {
+          startGame();
 
-        window.onload = (event) => {
-
-            document.addEventListener('enter-vr', () => {
-
-                startGame();
-
-                var entity = document.querySelector('#river');
-                entity.components.sound.playSound();
-                
-             firevidplay = document.querySelector('#firevid');
-                firevidplay.play();
-                
-                fire1 = document.querySelector('#fire1');
-                fire1.setAttribute("visible", "true");
-                
-                 fire1 = document.querySelector('#fire2');
-                fire2.setAttribute("visible", "true");
-            })
-            
-            
-
-        };
+          const entity = document.querySelector('#river');
+          entity.components.sound.playSound();
+          
+          const firevidplay = document.querySelector('#firevid');
+          firevidplay.play();
+          
+          const fire1 = document.querySelector('#fire1');
+          fire1.setAttribute("visible", "true");
+          
+          const fire2 = document.querySelector('#fire2');
+          fire2.setAttribute("visible", "true");
+        })
+      };
 
 
-function startGame() {
-            
-         setTimeout(function(){ 
-
-              room.setAttribute("animation-mixer", {clip: '*',loop: 'once'}); 
-                room.addEventListener('animation-finished',function() {
-                room.removeAttribute('animation-mixer');
-              },{once:true});
-             
-             spawnTrue = false;
-
-            }, 63000);
-  
-
-            setTimeout(function(){ 
-
-                
-                setInterval(function(){  
-                if (spawnTrue) {
-                    spawnItem(); 
-                }
-                    
-                
-                }, 2000);
-
-                
-            }, 2000);
-            
-}
+      function startGame() {
+        setTimeout (function () { 
+          room.setAttribute("animation-mixer", {clip: '*',loop: 'once'}); 
+          room.addEventListener('animation-finished', function() {
+            room.removeAttribute('animation-mixer');
+          }, {once:true});
            
-        
+          spawnTrue = false;
+        }, 63000);
 
-        
+        setTimeout (function () { 
+          setInterval (function () {  
+            if (spawnTrue) {
+              spawnItem(); 
+            }
+          }, 2000);
+        }, 2000);
+      }
 
-function spawnItem(item) {
-    
+      function spawnItem(item) {
         whichItem = Math.round(Math.random() * 13);
-
 
         spawnItemBox = document.createElement('a-box');
         sceneEl.appendChild(spawnItemBox);
@@ -173,25 +167,21 @@ function spawnItem(item) {
         spawnItemBox.setAttribute("position", "-1.65 -0.2 -1.5");
         spawnItem2.setAttribute("scale", "0.02 0.02 0.02");
     
-        spawnItem2.setAttribute("fbx-model", "src: url(assets/"+itemsList[whichItem]+".fbx);");
+        spawnItem2.setAttribute(
+          "fbx-model",
+          "src: url(assets/"+itemsList[whichItem]+".fbx);"
+        );
 
         spawnItemBox.setAttribute("kill", "");
-        setTimeout(function(){ 
-            
-        spawnItemBox.body.applyLocalImpulse(
-          new CANNON.Vec3((Math.random() * 5)+3, (Math.random() * 10)+32, 10),
-          new CANNON.Vec3(0, 0, 0)
-        );}, 100);
-}
-        
+
+        setTimeout( function () { 
+          spawnItemBox.body.applyLocalImpulse(
+            new CANNON.Vec3((Math.random()*5)+3, (Math.random()*10)+32, 10),
+            new CANNON.Vec3(0, 0, 0)
+          );
+        }, 100);
+      }
     </script>
-           
-
-
-    
-    
-    
-</a-scene>
-
+  </a-scene>
   </body>
 </html>
