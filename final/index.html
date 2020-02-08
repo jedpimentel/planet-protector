@@ -73,7 +73,7 @@
     <a-sky id="background" src="#skyTexture" theta-length="180" radius="32">
     </a-sky>
     
-    <a-entity>
+    <a-entity id="cameraRig">
       <a-camera id="camera"></a-camera>
       <a-entity hand-controls="left" mixin="controller"></a-entity>
       <a-entity hand-controls="right" mixin="controller"></a-entity>
@@ -113,6 +113,9 @@
       
       window.onload = (event) => {
         document.addEventListener('enter-vr', () => {
+          const cameraRig = document.querySelector('#cameraRig')
+          cameraRig.object3D.position.z += 1;
+          
           startGame();
 
           const entity = document.querySelector('#river');
