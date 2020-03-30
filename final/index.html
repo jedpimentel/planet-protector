@@ -29,14 +29,12 @@
             physics="gravity: -9.8; friction: 0.03; debug:false"
             render="highRefreshRate:true;">
 
-            <!-- telehand concept sounds interesting for 3rd-person camera -->
-    <!-- <a-entity id="teleHand" hand-controls="left"></a-entity>
-    <a-entity id="blockHand" hand-controls="right"></a-entity> -->
+    <!-- telehand concept sounds interesting for 3rd-person camera -->
+    <!-- <a-entity hand-controls="left"></a-entity> -->
+    <!-- <a-entity hand-controls="right"></a-entity> -->
     
     <a-assets>
-      
       <video id="firevid" autoplay loop="true" preload="auto" src="assets/fire.mp4"></video>
-
       <a-mixin id="controller"
                super-hands="colliderEvent: collisions;
                             colliderEventProperty: els;
@@ -75,9 +73,49 @@
     
     <a-entity id="cameraRig">
       <a-camera id="camera"></a-camera>
-      <a-entity hand-controls="left" mixin="controller"></a-entity>
+      <a-entity id="left-hand" hand-controls="left" mixin="controller"></a-entity>
       <a-entity hand-controls="right" mixin="controller"></a-entity>
     </a-entity>
+
+    <script type="text/javascript">
+      AFRAME.registerComponent('tele-head', {
+        init: function () {
+            this.camPos = document.querySelector('a-camera').object3D.position;
+            this.camRot = document.querySelector('a-camera').object3D.rotation;
+
+            this.lastCamPos = new THREE.Vector3()
+            this.lastCamPos.copy(this.camPos)
+
+            this.pos = this.el.object3D.position;
+            this.rot = this.el.object3D.rotation;
+
+            this.pos.copy(this.camPos)
+            // this.pos.z -= 1;
+
+        },
+        tick: function () {
+          // var entity = this.el;
+
+          // console.log(this.camPos)
+          // console.log(this.camPos.x - this.lastCamPos.x)
+          this.pos.add(this.camPos).sub(this.lastCamPos);
+          // this.pos.x += this.camPos.x - this.lastCamPos.x
+
+          this.lastCamPos.copy(this.camPos)   
+
+          this.rot.copy(this.camRot)
+
+
+          // if (this.el.object3D.position.y < -3) {
+          //       entity.parentNode.removeChild(entity);
+          // }
+          // if (this.el.object3D.position.z > 3.15) {
+          //     entity.parentNode.removeChild(entity);
+          // }
+        }
+      });
+    </script>
+    <!-- <a-box tele-head height="0.2" width="0.2" depth="0.2"></a-box> -->
 
     <a-entity id="theRoom"
       scale="0.018 0.018 0.018" 
@@ -125,12 +163,14 @@
       function makeABin (x, y, z, height, width, depth, color) {
         const el = document.createElement('a-entity')
         el.setAttribute('position', `${x} ${y} ${z}`);
-        const wedge = 0.01
+        const wedge = 0.01;
+        const hideBoxes = true;
+        const opacity = hideBoxes ? 'opacity="0"' : '';//a mixin would be better
         el.innerHTML = `
-          <a-box static-body color="${color}" position="0 0 ${-depth/2}" height="${height}" width="${width}" depth="0.01"></a-box>
-          <a-box static-body color="${color}" position="0 0 ${depth/2}" height="${height}" width="${width}" depth="0.01"></a-box>
-          <a-box static-body color="${color}" position="${-width/2+wedge} 0 0" height="${height}" width="0.01" depth="${depth}"></a-box>
-          <a-box static-body color="${color}" position="${width/2-wedge} 0 0" height="${height}" width="0.01" depth="${depth}"></a-box>
+          <a-box static-body ${opacity} color="${color}" position="0 0 ${-depth/2}" height="${height}" width="${width}" depth="0.01"></a-box>
+          <a-box static-body ${opacity} color="${color}" position="0 0 ${depth/2}" height="${height}" width="${width}" depth="0.01"></a-box>
+          <a-box static-body ${opacity} color="${color}" position="${-width/2+wedge} 0 0" height="${height}" width="0.01" depth="${depth}"></a-box>
+          <a-box static-body ${opacity} color="${color}" position="${width/2-wedge} 0 0" height="${height}" width="0.01" depth="${depth}"></a-box>
         `
         return el
       }
